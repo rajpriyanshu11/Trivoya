@@ -1,9 +1,10 @@
-package com.example.trivoya.ui
+package com.example.trivoya.ui.WelcomeScreen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,15 +14,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.ClickableText
+import androidx.compose.foundation.text.input.TextObfuscationMode
+import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,9 +38,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -41,7 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.trivoya.R
 import com.example.trivoya.ui.components.TrivoyaElevatedBtn
-import com.example.trivoya.ui.components.TrivoyaFilledTonalBtn
+import com.example.trivoya.ui.components.TrivoyaSecureTextField
 import com.example.trivoya.ui.components.TrivoyaTextField
 
 @Preview(showBackground = true)
@@ -55,42 +64,53 @@ fun PreviewLoginScreen() {
 
 @Composable
 fun LoginScreen () {
-    var email by remember { mutableStateOf("")}
-    var password by remember { mutableStateOf("")}
-    val uriHandler = LocalUriHandler.current
+    var email by remember { mutableStateOf("") }
+    var passwordHidden by rememberSaveable { mutableStateOf(true) }
 
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.White)
-        ) {
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val screenHeight = maxHeight
+            val screenWidth = maxWidth
+            val topPadding = screenHeight * 0.2f
+            val bottomPadding = screenHeight * 0.03f
+
+            val calculatedFontSize = when {
+                screenWidth < 360.dp -> 26.sp
+                screenWidth < 400.dp -> 30.sp
+                else -> 35.sp
+            }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(start = 24.dp, end = 24.dp, top = 250.dp, bottom = 50.dp)
-
+                    .padding(start = dimensionResource( R.dimen.padding_large), end = dimensionResource( R.dimen.padding_large), top = topPadding, bottom = bottomPadding)
             ) {
                 Column {
                     Text(
                         text = "Welcome Back",
                         style = MaterialTheme.typography.displayLarge,
                         color = Color.Black,
-                        fontSize = 40.sp,
-                        modifier = Modifier.padding(bottom = 10.dp)
+//                        fontSize = 40.sp,
+                        modifier = Modifier.padding(bottom=dimensionResource(R.dimen.padding_small))
                     )
 
                     Text(
                         text = "Please sign in to continue",
                         color = Color.Black,
-                        style = MaterialTheme.typography.displayLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontSize = 15.sp,
-                        modifier = Modifier.padding(bottom = 40.dp)
+                        modifier = Modifier.padding(bottom=dimensionResource(R.dimen.padding_xxlarge))
                     )
                     TrivoyaTextField(
                         value = email,
                         onValueChange = { email = it },
                         modifier = Modifier
-                            .shadow(8.dp)
+                            .shadow(dimensionResource(R.dimen.elevation_high))
                             .fillMaxWidth(),
                         placeholder = ("Email/Username"),
                         leadingIcon = {
@@ -101,33 +121,51 @@ fun LoginScreen () {
                         }
                     )
 
-                    Spacer(modifier = Modifier.height(26.dp))
+                    Spacer(modifier = Modifier.height(25.dp))
 
-                    TrivoyaTextField(
-                        value = password,
-                        onValueChange = { password = it },
-                        modifier = Modifier
-                            .shadow(8.dp)
-                            .fillMaxWidth(),
-                        placeholder = ("Password"),
+                    TrivoyaSecureTextField(
+                        state = rememberTextFieldState(),
+                        label = { Text("Enter password") },
+                        textObfuscationMode =
+                        if (passwordHidden) TextObfuscationMode.RevealLastTyped
+                        else TextObfuscationMode.Visible,
                         leadingIcon = { Icon(Icons.Default.Lock, contentDescription = "Password") },
-                        singleLine = true
+                        trailingIcon = {
+                            IconButton(onClick = { passwordHidden = !passwordHidden }) {
+                                val visibilityIcon =
+                                    if (passwordHidden) Icons.Filled.VisibilityOff else Icons.Filled.Visibility
+
+                                val description = if (passwordHidden) "Show password" else "Hide password"
+                                Icon(imageVector = visibilityIcon, contentDescription = description)
+                            }
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .shadow(dimensionResource(R.dimen.elevation_high)),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color(0xFFFFFFFF),
+                            unfocusedContainerColor = Color(0xFFFFFFFF),
+                            disabledContainerColor = Color.LightGray,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            disabledIndicatorColor = Color.Transparent
+                        ),
+
                     )
 
-                    Spacer(modifier = Modifier.height(26.dp))
+                    Spacer(modifier = Modifier.height(50.dp))
 
                     TrivoyaElevatedBtn(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .wrapContentWidth(Alignment.End)
-                            .height(50.dp),
+                            .height(dimensionResource(R.dimen.button_height_medium)),
                         text = " LOGIN",
                         onClick = { "" },
                         colors = ButtonDefaults.buttonColors(
                             containerColor = Color(0xFF3CA4AC),
                             contentColor = Color.White
                         ),
-                        elevation = ButtonDefaults.elevatedButtonElevation(4.dp)
+                        elevation = ButtonDefaults.elevatedButtonElevation(dimensionResource(R.dimen.elevation_medium))
                     )
 
                 }
@@ -141,18 +179,19 @@ fun LoginScreen () {
                         style = MaterialTheme.typography.bodyMedium,
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 16.dp)
+                            .padding(bottom=dimensionResource(R.dimen.padding_small))
                     )
 
                     Box(
                         modifier = Modifier
                             .align(Alignment.CenterHorizontally)
-                            .padding(bottom = 40.dp)
-                    ){
-                        Image(painter = painterResource(R.drawable.google_logo),
+                            .padding(top= dimensionResource(R.dimen.padding_small),bottom=dimensionResource(R.dimen.padding_xxlarge))
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.google_logo),
                             contentDescription = "google",
                             modifier = Modifier
-                                .size(40.dp)
+                                .size(dimensionResource(R.dimen.icon_large))
                                 .clickable(enabled = true, onClick = { "" })
                         )
                     }
@@ -162,7 +201,7 @@ fun LoginScreen () {
                         thickness = 1.dp,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 8.dp)
+                            .padding(vertical = dimensionResource(R.dimen.padding_small))
                     )
 
                     ClickableText(
@@ -174,30 +213,16 @@ fun LoginScreen () {
                                 fontWeight = FontWeight.Light
                             )
                         ),
-                        onClick = { uriHandler.openUri("https://google.com") },
+                        onClick = { ("") },
                         modifier = Modifier.align(Alignment.CenterHorizontally)
                     )
                 }
             }
         }
+    }
 }
 
 
-@Composable
-fun SubmitBtn() {
-        Button(
-            onClick = {},
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentWidth(Alignment.End) ,
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF3CA4AC),
-                contentColor = Color.White
-            )
 
-        ){
-            Text(text = "LOGIN")
-        }
-}
 
 

@@ -15,9 +15,18 @@ val Poppins = FontFamily(
     Font(R.font.poppins_semi_bold, FontWeight.SemiBold),
     Font(R.font.poppins_bold, FontWeight.Bold)
 )
-
+val RemachineScript = FontFamily(
+    Font(R.font.remachine_script)
+)
 // Set of Material typography styles to start with
 val Typography = Typography(
+    labelLarge = TextStyle(
+        fontFamily = RemachineScript,
+        fontWeight = FontWeight.Normal,
+        fontSize = 156.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
+    ),
     bodyLarge = TextStyle(
         fontFamily = FontFamily.Default,
         fontWeight = FontWeight.Normal,
@@ -28,7 +37,7 @@ val Typography = Typography(
     displayLarge = TextStyle(
         fontFamily = Poppins,
         fontWeight = FontWeight.Bold,
-        fontSize = 30.sp
+        fontSize = 35.sp
     ),
     titleLarge = TextStyle(
         fontFamily = Poppins,
@@ -64,7 +73,11 @@ val Typography = Typography(
     */
 )
 
-val RemachineScript = FontFamily(
-    Font(R.font.remachine_script)
+val TrivoyaLogoStyle = TextStyle(
+        fontFamily = RemachineScript,
+        fontWeight = FontWeight.Normal,
+        fontSize = 156.sp,
+        lineHeight = 24.sp,
+        letterSpacing = 0.5.sp
 )
 
